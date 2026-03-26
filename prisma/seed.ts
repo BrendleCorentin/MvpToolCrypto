@@ -77,6 +77,7 @@ async function main() {
         description: "Bridge at least 0.1 ETH"
       },
       {
+        projectId: demoProject.id,
         title: "Staking",
         description: "Stake tokens for yield"
       }
