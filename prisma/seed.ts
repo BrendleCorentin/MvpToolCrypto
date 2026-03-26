@@ -50,38 +50,36 @@ async function main() {
     ],
   });
 
-  await prisma.airdropTask.deleteMany({ where: { userId: user.id } });
+  // Create a demo airdrop project to attach tasks to
+  const demoProject = await prisma.airdropProject.upsert({
+    where: { id: "demo-layeredge" },
+    update: {},
+    create: {
+      id: "demo-layeredge",
+      name: "LayerEdge",
+      chain: "Ethereum",
+      userId: user.id
+    }
+  });
+
+  await prisma.airdropTask.deleteMany({ where: { projectId: demoProject.id } });
 
   await prisma.airdropTask.createMany({
     data: [
       {
-        userId: user.id,
-        project: "LayerEdge",
-        chain: "Ethereum",
-        status: "To do",
-        reward: "Unknown",
+        projectId: demoProject.id,
+        title: "Daily Check-in",
+        description: "Claim daily points"
       },
       {
-        userId: user.id,
-        project: "Base Ecosystem Campaign",
-        chain: "Base",
-        status: "In progress",
-        reward: "$50-$300 est.",
+        projectId: demoProject.id, 
+        title: "Bridge ETH",
+        description: "Bridge at least 0.1 ETH"
       },
       {
-        userId: user.id,
-        project: "Ronin Creator Quest",
-        chain: "Ronin",
-        status: "Done",
-        reward: "NFT badge",
-      },
-      {
-        userId: user.id,
-        project: "ZK Wallet Social Quest",
-        chain: "zkSync",
-        status: "To do",
-        reward: "Points",
-      },
+        title: "Staking",
+        description: "Stake tokens for yield"
+      }
     ],
   });
 }
