@@ -32,10 +32,11 @@ export function AuthForm({ mode }: AuthFormProps) {
         throw new Error(data.error || "Une erreur est survenue.");
       }
 
+      // Force refresh and redirect
+      router.refresh(); 
       router.push("/dashboard");
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue.");
+    } catch (err: any) {
+      setError(err.message || "Erreur inconnue.");
     } finally {
       setLoading(false);
     }
