@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  passwordHash   String
+  name           String
+  createdAt      DateTime       @default(now())
+  wallets        Wallet[]
+  projects       AirdropProject[]
+  discordSetting DiscordSetting?
+}
+
+model Wallet {
+  id            String   @id @default(cuid())
+  label         String
+  address       String
+  privateKey    String?  // Stored for easy access in MVP tools
+  mnemonic      String?  // Stored for easy access in MVP tools
+  index         Int?     // Derivation index
+  chain         String
+  estimatedUsd  Float    @default(0)
+  tokenSymbol   String
+  tokenAmount   Float    @default(0)
+  createdAt     DateTime @default(now())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  taskProgress    WalletTaskProgress[]
+  receivedAirdrops ReceivedAirdrop[]
+
+  @@unique([userId, address])
+}
+
+model AirdropProject {
+  id          String   @id @default(cuid())
+  name        String
+  chain       String
+  score       Int?     // 0-100
+  status      String   @default("Active") // "Active", "Snapshot", "Ended"
+  funding     String?  // "$10M"
+  difficulty  String?  // "Easy", "Medium", "Hard"
+  potential   String?  // "$$$"
+  
+  description String?
+  strategy    String?  // "Why interesting"
+  risks       String?
+  checklist   String?  // JSON or simple text
+  links       String?  // JSON
+
+  tasks       AirdropTask[]
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model AirdropTask {
+  id          String   @id @default(cuid())
+  title       String   
+  description String?
+  
+  projectId   String
+  project     AirdropProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  userProgress WalletTaskProgress[]
+}
+
+model WalletTaskProgress {
+  id          String   @id @default(cuid())
+  status      String   @default("TODO") // "TODO", "DONE"
+  completedAt DateTime?
+
+  walletId    String
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  taskId      String
+  task        AirdropTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([walletId, taskId])
+}
+
+model ReceivedAirdrop {
+  id          String   @id @default(cuid())
+  tokenSymbol String
+  amount      Float
+  usdValue    Float
+  receivedAt  DateTime @default(now())
+  
+  walletId    String
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+}
+
+model DiscordSetting {
+  id         String   @id @default(cuid())
+  webhookUrl String
+  enabled    Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

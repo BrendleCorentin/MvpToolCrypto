@@ -1,0 +1,25 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { AuthForm } from "@/components/auth-form";
+import { getCurrentUser } from "@/lib/auth";
+
+export default async function RegisterPage() {
+  const user = await getCurrentUser();
+  if (user) redirect("/dashboard");
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 py-10">
+      <div className="w-full max-w-md rounded-[2rem] border border-slate-800 bg-slate-900/70 p-8">
+        <p className="mb-2 text-sm uppercase tracking-[0.25em] text-indigo-300">Register</p>
+        <h1 className="text-3xl font-bold">Crée ton compte</h1>
+        <p className="mt-3 text-sm text-slate-300">Tu pourras ensuite gérer plusieurs wallets et un webhook Discord.</p>
+        <div className="mt-8">
+          <AuthForm mode="register" />
+        </div>
+        <p className="mt-6 text-sm text-slate-400">
+          Déjà inscrit ? <Link href="/login" className="text-indigo-300 hover:text-indigo-200">Connexion</Link>
+        </p>
+      </div>
+    </main>
+  );
+}
